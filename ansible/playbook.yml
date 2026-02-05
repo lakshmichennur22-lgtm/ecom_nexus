@@ -1,0 +1,6 @@
+- name: Deploy React App Using Role
+  hosts: webservers
+  become: yes
+
+  roles:
+    - react_deploy

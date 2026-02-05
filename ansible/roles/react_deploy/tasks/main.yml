@@ -1,0 +1,37 @@
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Install unzip
+  apt:
+    name: unzip
+    state: present
+
+- name: Download React build from Nexus
+  get_url:
+    url: "{{ nexus_url }}"
+    dest: /tmp/frontend-build.zip
+    username: "{{ nexus_user }}"
+    password: "{{ nexus_pass }}"
+    force: yes
+  notify: restart nginx
+
+- name: Remove old web files
+  file:
+    path: "{{ web_root }}"
+    state: absent
+
+- name: Create web root directory
+  file:
+    path: "{{ web_root }}"
+    state: directory
+    mode: '0755'
+
+- name: Unzip React build
+  unarchive:
+    src: /tmp/frontend-build.zip
+    dest: "{{ web_root }}"
+    remote_src: yes
+  notify: restart nginx

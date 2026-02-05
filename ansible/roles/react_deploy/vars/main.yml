@@ -1,0 +1,4 @@
+nexus_url: "http://54.227.202.82:8081/repository/ecom_nexus/frontend-build-3.zip"
+nexus_user: admin
+nexus_pass: lakshmi
+web_root: /var/www/html
