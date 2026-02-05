@@ -1,4 +1,5 @@
 ---
+# Install required packages
 - name: Install nginx
   apt:
     name: nginx
@@ -10,6 +11,7 @@
     name: unzip
     state: present
 
+# Download React build from Nexus
 - name: Download React build zip from Nexus
   get_url:
     url: "{{ nexus_url }}"
@@ -18,29 +20,40 @@
     password: "{{ nexus_pass }}"
     force: yes
 
-- name: Clean old deployment
+# Clean old deployment
+- name: Remove old web root
   file:
     path: /var/www/html
     state: absent
 
-- name: Create web root
+- name: Create web root directory
   file:
     path: /var/www/html
     state: directory
     mode: '0755'
 
+# Prepare temp folder
+- name: Create temp react directory
+  file:
+    path: /tmp/reactapp
+    state: directory
+    mode: '0755'
+
+# Unzip build
 - name: Unzip react build
   unarchive:
     src: /tmp/react-build.zip
     dest: /tmp/reactapp
     remote_src: yes
 
+# Copy build folder contents to nginx root
 - name: Copy build content to nginx root
   copy:
     src: /tmp/reactapp/build/
     dest: /var/www/html/
     remote_src: yes
 
+# Fix permissions
 - name: Fix permissions
   file:
     path: /var/www/html
@@ -48,7 +61,8 @@
     group: www-data
     recurse: yes
 
-- name: Configure nginx for react
+# Configure nginx for React routing
+- name: Configure nginx default site
   copy:
     dest: /etc/nginx/sites-enabled/default
     content: |
