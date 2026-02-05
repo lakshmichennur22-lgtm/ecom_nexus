@@ -10,39 +10,45 @@
     name: unzip
     state: present
 
-- name: Download React build from Nexus
+- name: Download React build zip from Nexus
   get_url:
     url: "{{ nexus_url }}"
-    dest: /tmp/frontend-build.zip
+    dest: /tmp/react-build.zip
     username: "{{ nexus_user }}"
     password: "{{ nexus_pass }}"
     force: yes
 
-- name: Remove old web files
+- name: Clean old deployment
   file:
-    path: "{{ web_root }}"
+    path: /var/www/html
     state: absent
 
-- name: Create web root directory
+- name: Create web root
   file:
-    path: "{{ web_root }}"
+    path: /var/www/html
     state: directory
     mode: '0755'
 
-- name: Unzip React build
+- name: Unzip react build
   unarchive:
-    src: /tmp/frontend-build.zip
-    dest: "{{ web_root }}"
+    src: /tmp/react-build.zip
+    dest: /tmp/reactapp
+    remote_src: yes
+
+- name: Copy build content to nginx root
+  copy:
+    src: /tmp/reactapp/build/
+    dest: /var/www/html/
     remote_src: yes
 
 - name: Fix permissions
   file:
-    path: "{{ web_root }}"
+    path: /var/www/html
     owner: www-data
     group: www-data
     recurse: yes
 
-- name: Configure nginx for React routing
+- name: Configure nginx for react
   copy:
     dest: /etc/nginx/sites-enabled/default
     content: |
